@@ -48,8 +48,26 @@ for r in 1:length(input)
   end
 end
 
-println("Matches: $(matches)")
+println("Matches (part 1): $(matches)")
 
 ##########
 # Part 2 #
 ##########
+
+word = "MAS"
+border = 1
+matches = 0
+
+for r in 2:length(input)-border
+  for c in 2:length(input)-border
+    word1 = ""
+    word2 = ""
+    for i in -1:1
+      word1 *= input[r+i][c+i]
+      word2 *= input[r+i][c-i]
+    end
+    global matches += checkmatch(word1, word) * checkmatch(word2, word)
+  end
+end
+
+println("Matches (part 2): $(matches)")
