@@ -16,21 +16,46 @@ equations = [(parse(Int, split(line, ':')[1]) =>
 ##########
 
 calibration_result = 0
+rejects = Vector{Pair{Int, Vector{Int}}}()
 
 for equation in equations
-  for cfg in 0:2^(length(equation.second)-1)-1
+  accepted = false
+  ops = 2
+  op_slots = length(equation.second)-1
+  cfg = zeros(Int, op_slots)
+  for _ in 1:ops^op_slots
     val = equation.second[1]
-    for i in 1:length(equation.second)-1
-      if ((cfg >> (i - 1)) & 1) == 0
+    for i in 1:op_slots
+      if cfg[i] == 0
         val += equation.second[i+1]
       else
         val *= equation.second[i+1]
+        # This check slows it down a bit for part 1
+        # Wonder if it'll help part 2
+        #if val > equation.first
+        #  break
+        #end
+      end
+    end
+    carry = true
+    for i in 1:op_slots
+      if carry
+        cfg[i] += 1
+        if cfg[i] > ops - 1
+          cfg[i] = 0
+        else
+          carry = false
+        end
       end
     end
     if val == equation.first
       global calibration_result += val
+      accepted = true
       break
     end
+  end
+  if !accepted
+    push!(rejects, equation)
   end
 end
 
