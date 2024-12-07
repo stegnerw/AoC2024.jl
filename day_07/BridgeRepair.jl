@@ -21,24 +21,18 @@ rejects = Vector{Pair{Int, Vector{Int}}}()
 for equation in equations
   accepted = false
   ops = 2
-  op_slots = length(equation.second)-1
-  cfg = zeros(Int, op_slots)
-  for _ in 1:ops^op_slots
+  cfg = zeros(Int, length(equation.second)-1)
+  for _ in 1:ops^length(cfg)
     val = equation.second[1]
-    for i in 1:op_slots
+    for i in 1:length(cfg)
       if cfg[i] == 0
         val += equation.second[i+1]
       else
         val *= equation.second[i+1]
-        # This check slows it down a bit for part 1
-        # Wonder if it'll help part 2
-        #if val > equation.first
-        #  break
-        #end
       end
     end
     carry = true
-    for i in 1:op_slots
+    for i in 1:length(cfg)
       if carry
         cfg[i] += 1
         if cfg[i] > ops - 1
@@ -64,3 +58,40 @@ println("Calibration result: $(calibration_result)")
 ##########
 # Part 2 #
 ##########
+
+for (i, equation) in enumerate(rejects)
+  #println("$(i) / $(length(rejects))")
+  #@show equation
+  ops = 3
+  cfg = zeros(Int, length(equation.second)-1)
+  for _ in 1:ops^length(cfg)
+    #@show cfg
+    val = equation.second[1]
+    for i in 1:length(cfg)
+      if cfg[i] == 0
+        val += equation.second[i+1]
+      elseif cfg[i] == 1
+        val *= equation.second[i+1]
+      else
+        val = parse(Int, string(val) * string(equation.second[i+1]))
+      end
+    end
+    carry = true
+    for i in 1:length(cfg)
+      if carry
+        cfg[i] += 1
+        if cfg[i] > ops - 1
+          cfg[i] = 0
+        else
+          carry = false
+        end
+      end
+    end
+    if val == equation.first
+      global calibration_result += val
+      break
+    end
+  end
+end
+
+println("Total calibration result: $(calibration_result)")
