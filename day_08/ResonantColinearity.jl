@@ -25,18 +25,21 @@ end
 
 antinodes = zeros(Bool, size(input))
 
-function markAntinode(pos::CartesianIndex{2})
+function markAntinode(pos::CartesianIndex{2}, map::Matrix{Bool})::Bool
   global antinodes
   if checkbounds(Bool, antinodes, pos)
-    antinodes[pos] = true
+    map[pos] = true
+    return true
+  else
+    return false
   end
 end
 
 for (type, locations) in antennas_map
   for i in eachindex(locations), j in eachindex(locations[i+1:end])
     diff = locations[i] - locations[i+j]
-    markAntinode(locations[i] + diff)
-    markAntinode(locations[i+j] - diff)
+    markAntinode(locations[i] + diff, antinodes)
+    markAntinode(locations[i+j] - diff, antinodes)
   end
 end
 
@@ -45,3 +48,25 @@ println("Antinodes: $(sum(antinodes))")
 ##########
 # Part 2 #
 ##########
+
+resonant_antinodes = zeros(Bool, size(input))
+
+for (type, locations) in antennas_map
+  for i in eachindex(locations), j in eachindex(locations[i+1:end])
+    diff = locations[i] - locations[i+j]
+    # We never actually need to scale but I thought this was a nifty operation
+    # Efficiency be damned!!
+    scale = gcd(diff[1], diff[2])
+    scl_diff = CartesianIndex(div.(diff.I, scale))
+    distance = 0
+    while markAntinode(locations[i] + distance * scl_diff, resonant_antinodes)
+      distance += 1
+    end
+    distance = 0
+    while markAntinode(locations[i] + distance * scl_diff, resonant_antinodes)
+      distance -= 1
+    end
+  end
+end
+
+println("Resonant antinodes: $(sum(resonant_antinodes))")
