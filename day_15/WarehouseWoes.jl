@@ -1,4 +1,4 @@
-#!/usr/bin/env julia#.#.O..#
+#!/usr/bin/env julia
 
 ####################
 # Input Processing #
@@ -35,19 +35,20 @@ function printwarehouse(warehouse::Matrix{Char})
   end
 end
 
-function move(pos::CartesianIndex{2}, dir::CartesianIndex{2})::Bool
-  if !checkbounds(Bool, warehouse, pos)
+function move(wh::Matrix{Char}, pos::CartesianIndex{2},
+              dir::Char)::Bool
+  if !checkbounds(Bool, wh, pos)
     return false
-  elseif warehouse[pos] == '#'
+  elseif wh[pos] == '#'
     return false
-  elseif warehouse[pos] == '.'
+  elseif wh[pos] == '.'
     return true
   end
 
-  new_pos = pos + dir
-  can_move = move(new_pos, dir)
+  new_pos = pos + dirs[dir]
+  can_move = move(wh, new_pos, dir)
   if can_move
-    warehouse[new_pos], warehouse[pos] = warehouse[pos], warehouse[new_pos]
+    wh[new_pos], wh[pos] = wh[pos], wh[new_pos]
   end
   return can_move
 end
@@ -58,9 +59,8 @@ end
 for m in moves
   global robot_pos
   #@show m
-  dir = dirs[m]
-  if move(robot_pos, dir)
-    robot_pos += dir
+  if move(warehouse, robot_pos, m)
+    robot_pos += dirs[m]
   end
 end
 
@@ -74,3 +74,92 @@ println("Sum of GPS coordinates: $(sum(gps_coords))")
 ##########
 # Part 2 #
 ##########
+
+function getbigwarehouse(warehouse::Matrix{Char})
+  new_warehouse = Matrix{Char}(undef, size(warehouse)[1]*2, size(warehouse)[2])
+  for idx in eachindex(warehouse)
+    scaled_idx = 2*(idx-1) + 1
+    if warehouse[idx] == '@'
+      new_warehouse[scaled_idx] = warehouse[idx]
+      new_warehouse[scaled_idx+1] = '.'
+    elseif warehouse[idx] == 'O'
+      new_warehouse[scaled_idx] = '['
+      new_warehouse[scaled_idx+1] = ']'
+    else
+      new_warehouse[scaled_idx] = warehouse[idx]
+      new_warehouse[scaled_idx+1] = warehouse[idx]
+    end
+  end
+  return new_warehouse
+end
+
+function big_canmove(wh::Matrix{Char}, pos::CartesianIndex{2},
+                     dir::Char)::Bool
+  if !checkbounds(Bool, wh, pos)
+    return false
+  elseif wh[pos] == '#'
+    return false
+  elseif wh[pos] == '.'
+    return true
+  end
+
+  pos2::Union{Nothing, CartesianIndex{2}} = nothing
+  if wh[pos] == ']'
+    pos2 = pos + dirs['<']
+  elseif wh[pos] == '['
+    pos2 = pos + dirs['>']
+  end
+
+  return big_canmove(wh, pos+dirs[dir], dir) &&
+         (isnothing(pos2) || big_canmove(wh, pos2+dirs[dir], dir))
+end
+
+function big_move(wh::Matrix{Char}, pos::CartesianIndex{2},
+                  dir::Char)::Bool
+  if wh[pos] == '.' return true end
+
+  pos2::Union{Nothing, CartesianIndex{2}} = nothing
+  if wh[pos] == ']'
+    pos2 = pos + dirs['<']
+  elseif wh[pos] == '['
+    pos2 = pos + dirs['>']
+  end
+
+  big_move(wh, pos+dirs[dir], dir)
+  wh[pos+dirs[dir]], wh[pos] = wh[pos], wh[pos+dirs[dir]]
+  if !isnothing(pos2)
+    big_move(wh, pos2+dirs[dir], dir)
+    wh[pos2+dirs[dir]], wh[pos2] = wh[pos2], wh[pos2+dirs[dir]]
+  end
+  return true
+end
+
+bigwarehouse = getbigwarehouse(stack(input[1:split_point-1]))
+
+#println("Initial big warehouse:")
+#printwarehouse(bigwarehouse)
+
+robot_pos = findfirst(x->x=='@', bigwarehouse)
+
+for m in moves
+  global robot_pos
+  #@show m
+  if m == '<' || m == '>'
+    if move(bigwarehouse, robot_pos, m)
+      robot_pos += dirs[m]
+    end
+  else
+    if big_canmove(bigwarehouse, robot_pos, m)
+      big_move(bigwarehouse, robot_pos, m)
+      robot_pos += dirs[m]
+    end
+  end
+end
+
+#println("Final big warehouse:")
+#printwarehouse(bigwarehouse)
+
+big_box_coords = findall(x->x=='[', bigwarehouse)
+big_gps_coords = [100 * (x[2]-1) + (x[1] - 1) for x in big_box_coords]
+println("Sum of GPS coordinates: $(sum(big_gps_coords))")
+
