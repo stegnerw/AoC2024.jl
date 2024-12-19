@@ -19,9 +19,6 @@ function getantennas(map::Matrix{Char})::Dict{Char, Vector{CartesianIndex{2}}}
   return antennas_map
 end
 
-##########
-# Part 1 #
-##########
 function markAntinode(pos::CartesianIndex{2}, map::Matrix{Bool})::Bool
   if checkbounds(Bool, map, pos)
     map[pos] = true
@@ -46,10 +43,6 @@ function part1(input::String)::Int
 
   return sum(antinodes)
 end
-
-##########
-# Part 2 #
-##########
 
 function part2(input::String)::Int
   map = parseinput(input)

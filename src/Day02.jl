@@ -24,10 +24,6 @@ function part1(input::String)::Int
   return safe_lines
 end
 
-##########
-# Part 2 #
-##########
-
 function part2(input::String)::Int
   safeish_lines = 0
   for line in parseinput(input)

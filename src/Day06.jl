@@ -76,10 +76,6 @@ function part1(input::String)::Int
   return sum(visited)
 end
 
-##########
-# Part 2 #
-##########
-
 function part2(input::String)::Int
   lab = parseinput(input)
   init_pos = getinitpos(lab)

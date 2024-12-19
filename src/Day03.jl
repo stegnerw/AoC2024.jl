@@ -31,7 +31,6 @@ function part2(input::String)::Int
   return part1(input)
 end
 
-
 # Main
 if abspath(PROGRAM_FILE) == @__FILE__
   include(joinpath(@__DIR__, "AoC2024.jl"))

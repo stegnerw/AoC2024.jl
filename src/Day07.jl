@@ -55,10 +55,6 @@ function part1(input::String)::Int
   return calibration_result
 end
 
-##########
-# Part 2 #
-##########
-
 function part2(input::String)::Int
   equations = parseinput(input)
 
@@ -90,6 +86,5 @@ if abspath(PROGRAM_FILE) == @__FILE__
   println("Part 1:", part1(getinput(7, testing)))
   println("Part 2:", part2(getinput(7, testing)))
 end
-
 
 end # module Day07
