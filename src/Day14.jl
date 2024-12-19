@@ -1,8 +1,7 @@
 #!/usr/bin/env julia
-
-####################
-# Input Processing #
-####################
+"https://adventofcode.com/2024/day/14"
+module Day14
+using Statistics
 
 struct Robot
   pos::Vector{Int}
@@ -15,15 +14,9 @@ function parseline(l::AbstractString)
   return Robot(pos, vel)
 end
 
-input = open(string(@__DIR__, "/input.txt")) do f
-  split(read(f, String), "\n")[1:end-1]
+function parseinput(input::String)::Vector{Robot}
+  return map(parseline, split(input, "\n"))
 end
-
-global robots::Vector{Robot} = map(parseline, input)
-
-##########
-# Part 1 #
-##########
 
 function printfacility(f::Matrix{Int})
   # Flip rows/cols to match problem description for easier visual comparison
@@ -41,14 +34,10 @@ function wrappos(pos::Vector{Int}, size::Vector{Int})::Vector{Int}
   return (pos .% size + size) .% size + [1,1]
 end
 
-# Test Facility
-#const facility_size = [11, 7]
-# Real Facility
-const facility_size = [101, 103]
-const max_sim_time = 100
 
-function simtotime(time::Int, anomaly_threshold::Float64=0.0)::Int
-  global robots
+function simtotime(time::Int, robots::Vector{Robot},
+                   facility_size::Vector{Int},
+                   anomaly_threshold::Float64=0.0)::Int
   facility = zeros(Int, Tuple(facility_size))
   quadrants = zeros(Int, (2,2))
   quadrant_bounds = ceil.(Int,facility_size / 2)
@@ -74,20 +63,34 @@ function simtotime(time::Int, anomaly_threshold::Float64=0.0)::Int
   return safety_factor
 end
 
-println("Safety factor: $(simtotime(max_sim_time))")
+function part1(input::String, testing::Bool=false)::Int
+  if testing
+    facility_size = [11, 7]
+  else
+    facility_size = [101, 103]
+  end
+  robots = parseinput(input)
+  return simtotime(100, robots, facility_size)
+end
 
 ##########
 # Part 2 #
 ##########
 
-#using Plots
-using Statistics
+function part2(input::String, testing::Bool=false)::Int
+  if testing
+    facility_size = [11, 7]
+  else
+    facility_size = [101, 103]
+  end
+  robots = parseinput(input)
+  safety_factors = map(t->simtotime(t, robots, facility_size), 1:10000)
+  tree_time = argmin(safety_factors)
+  #simtotime(tree_time, robots, facility_size, Inf)
+  return tree_time
+end
 
-safety_factors = map(simtotime, 1:10000)
-tree_time = argmin(safety_factors)
-# Setting anomaly_threshold to Inf makes it always print
-#simtotime(tree_time, Inf)
-println("Tree at: $(tree_time)")
+#using Plots
 
 # I did some work to look at how the safety factor changes over time and noticed
 # some anomalous entries. I manually iterated all of the anomalous entries for a
@@ -99,3 +102,14 @@ println("Tree at: $(tree_time)")
 #
 #plot(safety_factors, show=true)
 #anomaly_threshold = mean(safety_factors) - 3*std(safety_factors)
+
+# Main
+if abspath(PROGRAM_FILE) == @__FILE__
+  include(joinpath(@__DIR__, "AoC2024.jl"))
+  using .AoC2024
+  testing = false
+  println("Part 1:", part1(getinput(14, testing), testing))
+  println("Part 2:", part2(getinput(14, testing), testing))
+end
+
+end # module Day14
