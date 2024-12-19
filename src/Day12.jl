@@ -1,24 +1,16 @@
 #!/usr/bin/env julia
+"https://adventofcode.com/2024/day/12"
+module Day12
 
-####################
-# Input Processing #
-####################
-
-input = open(string(@__DIR__, "/input.txt")) do f
-  stack(eachline(f))
+function parseinput(input::String)::Matrix{Char}
+  return stack(split(input, '\n'))
 end
-
-##########
-# Part 1 #
-##########
 
 # Offset to tile entity is facing
 dirs = [CartesianIndex(-1, 0),  # north
         CartesianIndex(0, 1),   # east
         CartesianIndex(1, 0),   # south
         CartesianIndex(0, -1)]  # west
-
-visited1 = zeros(Bool, size(input))
 
 function getfences(pos::CartesianIndex{2}, m::Matrix{Char})::Int
   return count(dir->!checkbounds(Bool, m, pos+dir) ||
@@ -44,15 +36,14 @@ function getcost(area_fences::Vector{Int})::Int
   return area_fences[1] * area_fences[2]
 end
 
-cost = sum(map(x->getcost(getareafences(x, input, visited1, getfences)),
-               CartesianIndices(size(input))))
-println("Cost: $(cost)")
+function part1(input::String)::Int
+  garden = parseinput(input)
+  visited = zeros(Bool, size(garden))
+  cost = sum(map(x->getcost(getareafences(x, garden, visited, getfences)),
+                 CartesianIndices(size(garden))))
+  return cost
+end
 
-##########
-# Part 2 #
-##########
-
-visited2 = zeros(Bool, size(input))
 long_fences = Dict{Char,Array{Bool}}()#char => zeros(Bool, (size(input)..., 4))
 
 function mark_longfences(pos::CartesianIndex{2}, d::Int, m::Matrix{Char})
@@ -75,7 +66,7 @@ end
 function getfences_discount(pos::CartesianIndex{2}, m::Matrix{Char})::Int
   fences = 0
   if !haskey(long_fences, m[pos])
-    long_fences[m[pos]] = zeros(Bool, (size(input)..., 4))
+    long_fences[m[pos]] = zeros(Bool, (size(m)..., 4))
   end
   for (d,dir) in enumerate(dirs)
     next_pos = pos + dir
@@ -87,7 +78,22 @@ function getfences_discount(pos::CartesianIndex{2}, m::Matrix{Char})::Int
   return fences
 end
 
-cost_discount = sum(map(x->getcost(getareafences(x, input, visited2,
-                                                 getfences_discount)),
-               CartesianIndices(size(input))))
-println("Discount cost: $(cost_discount)")
+function part2(input::String)::Int
+  garden = parseinput(input)
+  visited = zeros(Bool, size(garden))
+  cost_discount = sum(map(x->getcost(getareafences(x, garden, visited,
+                                                   getfences_discount)),
+                          CartesianIndices(size(garden))))
+  return cost_discount
+end
+
+# Main
+if abspath(PROGRAM_FILE) == @__FILE__
+  include(joinpath(@__DIR__, "AoC2024.jl"))
+  using .AoC2024
+  testing = false
+  println("Part 1:", part1(getinput(12, testing)))
+  println("Part 2:", part2(getinput(12, testing)))
+end
+
+end # module Day12
