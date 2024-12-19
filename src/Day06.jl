@@ -12,7 +12,6 @@ const dirs = [CartesianIndex(0,-1), # North
               CartesianIndex(-1,0)] # West
 
 function getinitpos(lab::Matrix{Char})::CartesianIndex{2}
-  # (row, col, dir) - dir - 1 = up, 2 = right, etc.
   return findfirst(x->x=='^', lab)
 end
 
@@ -114,8 +113,8 @@ if abspath(PROGRAM_FILE) == @__FILE__
   include(joinpath(@__DIR__, "AoC2024.jl"))
   using .AoC2024
   testing = false
-  println("Part 1:", part1(getinput(6, testing)))
-  println("Part 2:", part2(getinput(6, testing)))
+  println("Part 1: ", part1(getinput(6, testing)))
+  println("Part 2: ", part2(getinput(6, testing)))
 end
 
 

@@ -3,7 +3,7 @@
 module Day09
 
 function parseinput(input::String)::Matrix{Int}
-  parse.(Int, stack(split(input)))
+  return parse.(Int, stack(split(input)))
 end
 
 function getfileid(idx::Int)::Union{Nothing,Int}
@@ -110,8 +110,8 @@ if abspath(PROGRAM_FILE) == @__FILE__
   include(joinpath(@__DIR__, "AoC2024.jl"))
   using .AoC2024
   testing = false
-  println("Part 1:", part1(getinput(9, testing)))
-  println("Part 2:", part2(getinput(9, testing)))
+  println("Part 1: ", part1(getinput(9, testing)))
+  println("Part 2: ", part2(getinput(9, testing)))
 end
 
 end # module Day09

@@ -1,6 +1,6 @@
 #!/usr/bin/env julia
-"https://adventofcode.com/2024/day/9"
-module Day09
+"https://adventofcode.com/2024/day/11"
+module Day11
 using Memoization
 
 function parseinput(input::String)::Vector{Int}
@@ -48,8 +48,8 @@ if abspath(PROGRAM_FILE) == @__FILE__
   include(joinpath(@__DIR__, "AoC2024.jl"))
   using .AoC2024
   testing = false
-  println("Part 1:", part1(getinput(11, testing)))
-  println("Part 2:", part2(getinput(11, testing)))
+  println("Part 1: ", part1(getinput(11, testing)))
+  println("Part 2: ", part2(getinput(11, testing)))
 end
 
 end # module Day11

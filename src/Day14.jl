@@ -73,10 +73,6 @@ function part1(input::String, testing::Bool=false)::Int
   return simtotime(100, robots, facility_size)
 end
 
-##########
-# Part 2 #
-##########
-
 function part2(input::String, testing::Bool=false)::Int
   if testing
     facility_size = [11, 7]
@@ -108,8 +104,8 @@ if abspath(PROGRAM_FILE) == @__FILE__
   include(joinpath(@__DIR__, "AoC2024.jl"))
   using .AoC2024
   testing = false
-  println("Part 1:", part1(getinput(14, testing), testing))
-  println("Part 2:", part2(getinput(14, testing), testing))
+  println("Part 1: ", part1(getinput(14, testing), testing))
+  println("Part 2: ", part2(getinput(14, testing), testing))
 end
 
 end # module Day14

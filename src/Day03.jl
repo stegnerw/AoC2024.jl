@@ -36,8 +36,8 @@ if abspath(PROGRAM_FILE) == @__FILE__
   include(joinpath(@__DIR__, "AoC2024.jl"))
   using .AoC2024
   testing = false
-  println("Part 1:", part1(getinput(3, testing)))
-  println("Part 2:", part2(getinput(3, testing)))
+  println("Part 1: ", part1(getinput(3, testing)))
+  println("Part 2: ", part2(getinput(3, testing)))
 end
 
 end # module Day03
