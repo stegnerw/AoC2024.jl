@@ -1,18 +1,16 @@
 #!/usr/bin/env julia
+"https://adventofcode.com/2024/day/15"
+module Day15
 
-####################
-# Input Processing #
-####################
-
-input = open(string(@__DIR__, "/input.txt")) do f
-  split(read(f, String), "\n")[1:end-1]
+function parseinput(input::String)::Tuple{Matrix{Char}, String,
+                                          CartesianIndex{2}}
+  lines = split(input, "\n")
+  split_point = findfirst(x->x=="", lines)
+  warehouse = stack(lines[1:split_point-1])
+  moves = join(lines[split_point+1:end])
+  robot_pos = findfirst(x->x=='@', warehouse)
+  return warehouse, moves, robot_pos
 end
-
-# Split input
-split_point = findfirst(x->x=="", input)
-warehouse = stack(input[1:split_point-1])
-moves = join(input[split_point+1:end])
-robot_pos = findfirst(x->x=='@', warehouse)
 
 # Offset to tile entity is facing
 # First coordinate is distance from left boundary
@@ -21,10 +19,6 @@ dirs = Dict('^' => CartesianIndex{2}(0, -1), # up
             '>' => CartesianIndex{2}(1, 0),  # right
             'v' => CartesianIndex{2}(0, 1),  # down
             '<' => CartesianIndex{2}(-1, 0)) # left
-
-##########
-# Part 1 #
-##########
 
 function printwarehouse(warehouse::Matrix{Char})
   for c in eachcol(warehouse)
@@ -53,27 +47,19 @@ function move(wh::Matrix{Char}, pos::CartesianIndex{2},
   return can_move
 end
 
-#println("Initial warehouse:")
-#printwarehouse(warehouse)
-
-for m in moves
-  global robot_pos
-  #@show m
-  if move(warehouse, robot_pos, m)
-    robot_pos += dirs[m]
+function part1(input::String)::Int
+  warehouse, moves, robot_pos = parseinput(input)
+  for m in moves
+    robot_pos
+    if move(warehouse, robot_pos, m)
+      robot_pos += dirs[m]
+    end
   end
+
+  box_coords = findall(x->x=='O', warehouse)
+  gps_coords = [100 * (x[2]-1) + (x[1] - 1) for x in box_coords]
+  return sum(gps_coords)
 end
-
-#println("Final warehouse:")
-#printwarehouse(warehouse)
-
-box_coords = findall(x->x=='O', warehouse)
-gps_coords = [100 * (x[2]-1) + (x[1] - 1) for x in box_coords]
-println("Sum of GPS coordinates: $(sum(gps_coords))")
-
-##########
-# Part 2 #
-##########
 
 function getbigwarehouse(warehouse::Matrix{Char})
   new_warehouse = Matrix{Char}(undef, size(warehouse)[1]*2, size(warehouse)[2])
@@ -134,32 +120,37 @@ function big_move(wh::Matrix{Char}, pos::CartesianIndex{2},
   return true
 end
 
-bigwarehouse = getbigwarehouse(stack(input[1:split_point-1]))
+function part2(input::String)::Int
+  warehouse, moves, robot_pos = parseinput(input)
+  bigwarehouse = getbigwarehouse(warehouse)
+  robot_pos = findfirst(x->x=='@', bigwarehouse)
 
-#println("Initial big warehouse:")
-#printwarehouse(bigwarehouse)
-
-robot_pos = findfirst(x->x=='@', bigwarehouse)
-
-for m in moves
-  global robot_pos
-  #@show m
-  if m == '<' || m == '>'
-    if move(bigwarehouse, robot_pos, m)
-      robot_pos += dirs[m]
-    end
-  else
-    if big_canmove(bigwarehouse, robot_pos, m)
-      big_move(bigwarehouse, robot_pos, m)
-      robot_pos += dirs[m]
+  for m in moves
+    robot_pos
+    if m == '<' || m == '>'
+      if move(bigwarehouse, robot_pos, m)
+        robot_pos += dirs[m]
+      end
+    else
+      if big_canmove(bigwarehouse, robot_pos, m)
+        big_move(bigwarehouse, robot_pos, m)
+        robot_pos += dirs[m]
+      end
     end
   end
+
+  big_box_coords = findall(x->x=='[', bigwarehouse)
+  big_gps_coords = [100 * (x[2]-1) + (x[1] - 1) for x in big_box_coords]
+  return sum(big_gps_coords)
 end
 
-#println("Final big warehouse:")
-#printwarehouse(bigwarehouse)
+# Main
+if abspath(PROGRAM_FILE) == @__FILE__
+  include(joinpath(@__DIR__, "AoC2024.jl"))
+  using .AoC2024
+  testing = false
+  println("Part 1:", part1(getinput(15, testing)))
+  println("Part 2:", part2(getinput(15, testing)))
+end
 
-big_box_coords = findall(x->x=='[', bigwarehouse)
-big_gps_coords = [100 * (x[2]-1) + (x[1] - 1) for x in big_box_coords]
-println("Sum of GPS coordinates: $(sum(big_gps_coords))")
-
+end # module Day15
